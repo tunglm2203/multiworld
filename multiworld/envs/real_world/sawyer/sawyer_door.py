@@ -6,13 +6,15 @@ from multiworld.core.multitask_env import MultitaskEnv
 from multiworld.envs.env_util import create_stats_ordered_dict, get_stat_in_paths
 import numpy as np
 
+
 class SawyerDoorEnv(sawyer_door.SawyerDoorEnv, MultitaskEnv):
     ''' Must Wrap with Image Env to use!'''
+
     def __init__(self,
                  door_open_epsilon=2,
                  **kwargs
-                ):
-        self.door_open_epsilon=door_open_epsilon
+                 ):
+        self.door_open_epsilon = door_open_epsilon
         Serializable.quick_init(self, locals())
         sawyer_door.SawyerDoorEnv.__init__(self, **kwargs)
         self.observation_space = Dict([
@@ -54,7 +56,7 @@ class SawyerDoorEnv(sawyer_door.SawyerDoorEnv, MultitaskEnv):
         )
 
     def reset(self):
-        if not self.reset_free or self.eval_mode=='eval':
+        if not self.reset_free or self.eval_mode == 'eval':
             super()._reset_robot_and_door()
         goal = self.sample_goal()
         self._state_goal = goal['state_desired_goal']
@@ -98,17 +100,18 @@ class SawyerDoorEnv(sawyer_door.SawyerDoorEnv, MultitaskEnv):
                 '%s%s' % (prefix, stat_name),
                 stat,
                 always_show_all_stats=True,
-                ))
+            ))
             statistics.update(create_stats_ordered_dict(
                 'Final %s%s' % (prefix, stat_name),
                 [s[-1] for s in stat],
                 always_show_all_stats=True,
-                ))
+            ))
         return statistics
 
     def set_mode(self, mode):
         self.eval_mode = mode
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     env = SawyerDoorEnv()
     env.reset()

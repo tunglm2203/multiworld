@@ -3,11 +3,13 @@ import sawyer_control.envs.sawyer_pushing as sawyer_pushing
 from multiworld.core.serializable import Serializable
 from multiworld.core.multitask_env import MultitaskEnv
 
+
 class SawyerPushXYEnv(sawyer_pushing.SawyerPushXYEnv, MultitaskEnv):
     ''' Must Wrap with Image Env to use!'''
+
     def __init__(self,
                  **kwargs
-                ):
+                 ):
         Serializable.quick_init(self, locals())
         sawyer_pushing.SawyerPushXYEnv.__init__(self, **kwargs)
         self.observation_space = Dict([
@@ -44,12 +46,8 @@ class SawyerPushXYEnv(sawyer_pushing.SawyerPushXYEnv, MultitaskEnv):
         )
 
     def reset(self):
-        if self.action_mode == "position":
-            self._position_act(self.reset_pos - self._get_endeffector_pose(), in_reset=True)
-        else:
-            self._reset_robot()
-        goal = self.sample_goal()
-        self._state_goal = goal['state_desired_goal']
+        self._reset_robot()
+        self._state_goal = self.sample_goal()
         return self._get_obs()
 
     """
@@ -76,7 +74,8 @@ class SawyerPushXYEnv(sawyer_pushing.SawyerPushXYEnv, MultitaskEnv):
         goal = goal['state_desired_goal']
         super().set_to_goal(goal)
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     env = SawyerPushXYEnv()
     env.reset()
-    env.set_to_goal({'state_desired_goal':[0, .1]})
+    env.set_to_goal({'state_desired_goal': [0, .1]})
