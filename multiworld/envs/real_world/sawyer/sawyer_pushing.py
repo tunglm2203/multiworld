@@ -86,7 +86,6 @@ class SawyerPushXYEnv(sawyer_pushing.SawyerPushXYEnv, MultitaskEnv):
         }
 
     def set_to_goal(self, goal):
-        import pdb; pdb.set_trace()
         goal = goal['state_desired_goal']
         super().set_to_goal(goal)
 

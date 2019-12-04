@@ -177,7 +177,8 @@ class ImageEnv(ProxyEnv, MultitaskEnv):
         image_obs = self._wrapped_env.get_image(
             width=self.imsize,
             height=self.imsize,
-        )
+        )   # image_obs in format HWC
+        image_obs = np.swapaxes(image_obs, 0, 2)    # Change to format CHW
         self._last_image = image_obs
         if self.grayscale:
             image_obs = Image.fromarray(image_obs).convert('L')
@@ -185,7 +186,7 @@ class ImageEnv(ProxyEnv, MultitaskEnv):
         if self.normalize:
             image_obs = image_obs / 255.0
         if self.transpose:
-            image_obs = image_obs.transpose()
+            image_obs = image_obs.transpose((0, 2, 1))
         assert image_obs.shape[0] == self.channels
         return image_obs.flatten()
 
