@@ -25,7 +25,7 @@ def register_real_worl_envs():
         id='SawyerReachXYZReal-v0',
         entry_point='multiworld.envs.real_world.sawyer.sawyer_reaching:SawyerReachXYZEnv',
         kwargs={
-            'fix_goal': False,
+            'fix_goal': True,
             'reward_type': 'hand_distance',
             'action_mode': 'position',
             'max_speed': 0.5,
@@ -36,7 +36,7 @@ def register_real_worl_envs():
         id='SawyerPushXYReal-v0',
         entry_point='multiworld.envs.real_world.sawyer.sawyer_pushing:SawyerPushXYEnv',
         kwargs={
-            'fix_goal': False,
+            'fix_goal': True,
             'action_mode': 'position',
             'max_speed': 0.5,
         },
@@ -46,7 +46,7 @@ def register_real_worl_envs():
         id='SawyerDoorReal-v0',
         entry_point='multiworld.envs.real_world.sawyer.sawyer_door:SawyerDoorEnv',
         kwargs={
-            'fix_goal': False,
+            'fix_goal': True,
             'action_mode': 'position',
             'max_speed': 0.5,
         },
