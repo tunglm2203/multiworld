@@ -12,6 +12,17 @@ from multiworld.envs.env_util import concatenate_box_spaces
 from multiworld.envs.env_util import get_stat_in_paths, create_stats_ordered_dict
 
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
 class ImageEnv(ProxyEnv, MultitaskEnv):
     def __init__(
             self,
@@ -145,6 +156,12 @@ class ImageEnv(ProxyEnv, MultitaskEnv):
             self.wrapped_env.set_to_goal(self.wrapped_env.get_goal())
             self._img_goal = self._get_flat_img()
             self.wrapped_env.set_env_state(env_state)
+
+        if self.wrapped_env.__class__.__name__ == 'SawyerPushXYEnv':
+            # TUNG: Reset object to reset position again (after moved to goal position)
+            if self.pause_on_reset:
+                input(bcolors.OKBLUE + 'move object to original reset position and press enter' +
+                      bcolors.ENDC)
 
         return self._update_obs(obs)
 
