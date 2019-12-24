@@ -56,14 +56,16 @@ class SawyerReachXYZEnv(sawyer_reaching.SawyerReachXYZEnv, MultitaskEnv):
             state_achieved_goal=ee_pos,
         )
 
-    # def reset(self):
-    #     if self.action_mode == "position":
-    #         self._position_act(self.reset_pos - self._get_endeffector_pose(), in_reset=True)
-    #     else:
-    #         self._reset_robot()
-    #     goal = self.sample_goal()
-    #     self._state_goal = goal['state_desired_goal']
-    #     return self._get_obs()
+    def reset(self):
+        if self.action_mode == "position":
+            self.in_reset = True
+            self._position_act(self.pos_control_reset_position - self._get_endeffector_pose())
+            self.in_reset = False
+        else:
+            self._reset_robot()
+        goal = self.sample_goal()
+        self._state_goal = goal['state_desired_goal']
+        return self._get_obs()
 
     """
     Multitask functions
