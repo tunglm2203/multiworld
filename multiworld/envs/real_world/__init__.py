@@ -20,7 +20,7 @@ def register_real_worl_envs():
     """
     Reaching tasks
     """
-
+    max_speed = 0.15
     register(
         id='SawyerReachXYZReal-v0',
         entry_point='multiworld.envs.real_world.sawyer.sawyer_reaching:SawyerReachXYZEnv',
@@ -28,7 +28,8 @@ def register_real_worl_envs():
             'fix_goal': True,
             'reward_type': 'hand_distance',
             'action_mode': 'position',
-            'max_speed': 0.5,
+            'max_speed': max_speed,
+            'config_name': 'tung_config',
         },
     )
 
@@ -36,9 +37,11 @@ def register_real_worl_envs():
         id='SawyerPushXYReal-v0',
         entry_point='multiworld.envs.real_world.sawyer.sawyer_pushing:SawyerPushXYEnv',
         kwargs={
-            'fix_goal': True,
+            'fix_goal': False,  # True
+            # 'fixed_goal': (.50, -0.1, .45, .0),
             'action_mode': 'position',
-            'max_speed': 0.5,
+            'max_speed': max_speed,
+            'config_name': 'tung_config',
         },
     )
 
@@ -48,6 +51,6 @@ def register_real_worl_envs():
         kwargs={
             'fix_goal': True,
             'action_mode': 'position',
-            'max_speed': 0.5,
+            'max_speed': max_speed,
         },
     )
