@@ -10,6 +10,7 @@ from multiworld.core.multitask_env import MultitaskEnv
 from multiworld.core.wrapper_env import ProxyEnv
 from multiworld.envs.env_util import concatenate_box_spaces
 from multiworld.envs.env_util import get_stat_in_paths, create_stats_ordered_dict
+import time
 
 
 class bcolors:
@@ -160,8 +161,22 @@ class ImageEnv(ProxyEnv, MultitaskEnv):
         if self.wrapped_env.__class__.__name__ == 'SawyerPushXYEnv':
             # TUNG: Reset object to reset position again (after moved to goal position)
             if self.pause_on_reset:
-                input(bcolors.OKBLUE + 'move object to original reset position and press enter' +
-                      bcolors.ENDC)
+                if self.wrapped_env.use_gazebo_auto:
+                    print(bcolors.OKBLUE + 'move object to original reset position and press enter'
+                          + bcolors.ENDC)
+                    args = dict(x=self.wrapped_env.pos_object_reset_position[0],
+                                y=self.wrapped_env.pos_object_reset_position[1],
+                                z=self.wrapped_env.pos_object_reset_position[2])
+                    msg = dict(func='set_object_los', args=args)
+                    self.wrapped_env.client.sending(msg,
+                                                    sleep_before=self.config.SLEEP_BEFORE_SENDING_CMD_SOCKET,
+                                                    sleep_after=self.config.SLEEP_BETWEEN_2_CMDS)
+                    self.wrapped_env.client.sending(msg,
+                                                    sleep_before=0,
+                                                    sleep_after=self.config.SLEEP_AFTER_SENDING_CMD_SOCKET)
+                else:
+                    input(bcolors.OKBLUE + 'move object to original reset position and press enter'
+                          + bcolors.ENDC)
 
         return self._update_obs(obs)
 
