@@ -15,9 +15,38 @@ import copy
 
 from multiworld.core.multitask_env import MultitaskEnv
 
+# TUNG: Add for consistent with real env
+swap_xy = True
+
+
+def swap_xy_func(v):
+    res = None
+    if isinstance(v, tuple):
+        if len(v) == 2:
+            _tmp_0, _tmp_1 = v
+            res = (_tmp_1, _tmp_0)
+        elif len(v) == 3:
+            _tmp_0, _tmp_1, _tmp_2 = v
+            res = (_tmp_1, _tmp_0, _tmp_2)
+        else:
+            res = v
+    elif isinstance(v, np.ndarray):
+        if v.shape[0] == 2:
+            res = np.array([v[1], v[0]])
+        elif v.shape[0] == 3:
+            res = np.array([v[1], v[0], v[2]])
+        else:
+            res = v
+    else:
+        print('Cannot convert this type: ', type(v))
+    return res
+
 
 class SawyerPushAndReachXYEnv(MujocoEnv, Serializable, MultitaskEnv):
     INIT_HAND_POS = np.array([0, 0.4, 0.02])
+    # TUNG: Add for consistent with real env
+    if swap_xy:
+        INIT_HAND_POS = swap_xy_func(INIT_HAND_POS)
 
     def __init__(
             self,
@@ -44,6 +73,19 @@ class SawyerPushAndReachXYEnv(MujocoEnv, Serializable, MultitaskEnv):
         self._pos_action_scale = pos_action_scale
         self.hide_goal = hide_goal
 
+        # TUNG: Add for consistent with real env
+        if swap_xy:
+            init_block_low = swap_xy_func(init_block_low)
+            init_block_high = swap_xy_func(init_block_high)
+            puck_goal_low = swap_xy_func(puck_goal_low)
+            puck_goal_high = swap_xy_func(puck_goal_high)
+            hand_goal_low = swap_xy_func(hand_goal_low)
+            hand_goal_high = swap_xy_func(hand_goal_high)
+            fixed_puck_goal = swap_xy_func(fixed_puck_goal)
+            fixed_hand_goal = swap_xy_func(fixed_hand_goal)
+            mocap_low = swap_xy_func(mocap_low)
+            mocap_high = swap_xy_func(mocap_high)
+
         self.init_block_low = np.array(init_block_low)
         self.init_block_high = np.array(init_block_high)
         self.puck_goal_low = np.array(puck_goal_low)
@@ -64,10 +106,17 @@ class SawyerPushAndReachXYEnv(MujocoEnv, Serializable, MultitaskEnv):
             np.array([-1, -1]),
             np.array([1, 1]),
         )
-        self.obs_box = Box(
-            np.array([-0.2, 0.5, -0.2, 0.5]),
-            np.array([0.2, 0.7, 0.2, 0.7]),
-        )
+        # TUNG: Add for consistent with real env
+        if swap_xy:
+            self.obs_box = Box(
+                np.array([0.5, -0.2, 0.5, -0.2]),
+                np.array([0.7, 0.2, 0.7, 0.2]),
+            )
+        else:
+            self.obs_box = Box(
+                np.array([-0.2, 0.5, -0.2, 0.5]),
+                np.array([0.2, 0.7, 0.2, 0.7]),
+            )
         goal_low = np.concatenate((self.hand_goal_low, self.puck_goal_low))
         goal_high = np.concatenate((self.hand_goal_high, self.puck_goal_high))
         self.goal_box = Box(
@@ -98,7 +147,7 @@ class SawyerPushAndReachXYEnv(MujocoEnv, Serializable, MultitaskEnv):
     @property
     def model_name(self):
         return get_asset_full_path(
-            'sawyer_xyz/sawyer_push_and_reach_mocap_goal_hidden.xml'
+            'sawyer_xyz/sawyer_push_and_reach_mocap_goal_hidden_1.xml'
         )
 
     def viewer_setup(self):
@@ -111,9 +160,14 @@ class SawyerPushAndReachXYEnv(MujocoEnv, Serializable, MultitaskEnv):
         # cam_pos = np.array([0, 0.5, 0.2, cam_dist, -45, rotation_angle])
 
         # 3rd person view
-        cam_dist = 0.3
-        rotation_angle = 270
-        cam_pos = np.array([0, 1.0, 0.5, cam_dist, -45, rotation_angle])
+        if swap_xy:
+            cam_dist = 0.5
+            rotation_angle = 180
+            cam_pos = np.array([0.85, 0, 0.2, cam_dist, -55, rotation_angle])
+        else:
+            cam_dist = 0.3
+            rotation_angle = 270
+            cam_pos = np.array([0, 1.0, 0.5, cam_dist, -45, rotation_angle])
 
         # top down view
         # cam_dist = 0.2
@@ -476,10 +530,16 @@ class SawyerPushAndReachXYEasyEnv(SawyerPushAndReachXYEnv):
             **kwargs
     ):
         self.quick_init(locals())
-        default_kwargs = dict(
-            puck_goal_low=(-0.2, 0.5),
-            puck_goal_high=(0.2, 0.7),
-        )
+        if swap_xy:
+            default_kwargs = dict(
+                puck_goal_low=(0.5, -0.2),
+                puck_goal_high=(0.7, 0.2),
+            )
+        else:
+            default_kwargs = dict(
+                puck_goal_low=(-0.2, 0.5),
+                puck_goal_high=(0.2, 0.7),
+            )
         actual_kwargs = {
             **default_kwargs,
             **kwargs
@@ -490,7 +550,10 @@ class SawyerPushAndReachXYEasyEnv(SawyerPushAndReachXYEnv):
         )
 
     def sample_puck_xy(self):
-        return np.array([0, 0.6])
+        if swap_xy:
+            return np.array([0.6, 0])
+        else:
+            return np.array([0, 0.6])
 
 
 class SawyerPushAndReachXYHarderEnv(SawyerPushAndReachXYEnv):
