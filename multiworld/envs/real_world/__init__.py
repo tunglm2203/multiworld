@@ -42,6 +42,10 @@ def register_real_worl_envs():
             'action_mode': 'position',
             'max_speed': max_speed,
             'config_name': 'tung_config',
+            'hand_goal_low': (0.55, -0.1),
+            'hand_goal_high': (0.65, 0.1),
+            'puck_goal_low': (0.5, -0.15),
+            'puck_goal_high': (0.7, 0.15)
         },
     )
 
