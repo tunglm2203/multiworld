@@ -2,6 +2,7 @@ from gym.spaces import Dict
 import sawyer_control.envs.sawyer_pushing as sawyer_pushing
 from multiworld.core.serializable import Serializable
 from multiworld.core.multitask_env import MultitaskEnv
+import numpy as np
 import time
 
 
@@ -67,6 +68,14 @@ class SawyerPushXYEnv(sawyer_pushing.SawyerPushXYEnv, MultitaskEnv):
         if self.pause_on_reset:
             if self.use_gazebo_auto:
                 print(bcolors.OKBLUE+'move object to reset position and press enter'+bcolors.ENDC)
+                if self.random_init:
+                    obj_pos_rand = np.random.uniform(
+                        self.goal_space.low,
+                        self.goal_space.high,
+                        size=(1, self.goal_space.low.size),
+                    )
+                    obj_pos = obj_pos_rand[0][:2]
+                    self.pos_object_reset_position[:2] = obj_pos
                 args = dict(x=self.pos_object_reset_position[0],
                             y=self.pos_object_reset_position[1],
                             z=self.pos_object_reset_position[2])
