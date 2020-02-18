@@ -161,19 +161,13 @@ class ImageEnv(ProxyEnv, MultitaskEnv):
         if self.wrapped_env.__class__.__name__ == 'SawyerPushXYEnv':
             # TUNG: Reset object to reset position again (after moved to goal position)
             if self.pause_on_reset:
-                if self.wrapped_env.use_gazebo_auto:
-                    print(bcolors.OKBLUE + 'move object to original reset position and press enter'
+                if self.wrapped_env.AUTO_MOVE_OBJ:
+                    print(bcolors.OKGREEN + 'Auto move object to original reset position'
                           + bcolors.ENDC)
-                    args = dict(x=self.wrapped_env.pos_object_reset_position[0],
-                                y=self.wrapped_env.pos_object_reset_position[1],
-                                z=self.wrapped_env.pos_object_reset_position[2])
-                    msg = dict(func='set_object_los', args=args)
-                    self.wrapped_env.client.sending(msg,
-                                                    sleep_before=self.config.SLEEP_BEFORE_SENDING_CMD_SOCKET,
-                                                    sleep_after=self.config.SLEEP_BETWEEN_2_CMDS)
-                    self.wrapped_env.client.sending(msg,
-                                                    sleep_before=0,
-                                                    sleep_after=self.config.SLEEP_AFTER_SENDING_CMD_SOCKET)
+                    x=self.wrapped_env.pos_object_reset_position[0]
+                    y=self.wrapped_env.pos_object_reset_position[1]
+                    z=self.wrapped_env.pos_object_reset_position[2]
+                    self.wrapped_env.set_obj_to_pos('cylinder',[x,y,z])    
                 else:
                     input(bcolors.OKBLUE + 'move object to original reset position and press enter'
                           + bcolors.ENDC)
