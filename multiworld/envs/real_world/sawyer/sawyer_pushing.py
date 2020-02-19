@@ -67,25 +67,24 @@ class SawyerPushXYEnv(sawyer_pushing.SawyerPushXYEnv, MultitaskEnv):
             self._reset_robot()
         if self.pause_on_reset:
             if self.use_gazebo_auto:
-                print(bcolors.OKBLUE+'move object to reset position and press enter'+bcolors.ENDC)
+                print(
+                    bcolors.OKBLUE + 'move object to reset position and press enter' + bcolors.ENDC)
                 if self.random_init:
                     obj_pos_rand = np.random.uniform(
                         self.goal_space.low,
                         self.goal_space.high,
                         size=(1, self.goal_space.low.size),
                     )
-                    obj_pos = obj_pos_rand[0][:2]
-                    self.pos_object_reset_position[:2] = obj_pos
-                args = dict(x=self.pos_object_reset_position[0],
-                            y=self.pos_object_reset_position[1],
-                            z=self.pos_object_reset_position[2])
-                msg = dict(func='set_object_los', args=args)
-                self.client.sending(msg, sleep_before=self.config.SLEEP_BEFORE_SENDING_CMD_SOCKET,
-                                    sleep_after=self.config.SLEEP_BETWEEN_2_CMDS)
-                self.client.sending(msg, sleep_before=0,
-                                    sleep_after=self.config.SLEEP_AFTER_SENDING_CMD_SOCKET)
+                    self.pos_object_reset_position[:2] = obj_pos_rand[0][:2]
+
+                obj_pos = [self.pos_object_reset_position[0],
+                           self.pos_object_reset_position[1],
+                           self.pos_object_reset_position[2]]
+                obj_name = 'cylinder'  # Depend on your gazebo environment
+                self.set_obj_to_pos_in_gazebo(obj_name, obj_pos)
             else:
-                input(bcolors.OKBLUE+'move object to reset position and press enter'+bcolors.ENDC)
+                input(
+                    bcolors.OKBLUE + 'move object to reset position and press enter' + bcolors.ENDC)
         goal = self.sample_goal()
         self._state_goal = goal['state_desired_goal']
         return self._get_obs()
