@@ -45,7 +45,6 @@ class SawyerPushXYEnv(sawyer_pushing.SawyerPushXYEnv, MultitaskEnv):
 
     def set_obj_to_pos(self,name, pos):
         #rospy.init_node('set_pose')
-        time.sleep(5)
         state_msg = ModelState()
         state_msg.model_name = name
         state_msg.pose.position.x = float(pos[0])
@@ -61,6 +60,7 @@ class SawyerPushXYEnv(sawyer_pushing.SawyerPushXYEnv, MultitaskEnv):
             resp = set_state( state_msg )
         except rospy.ServiceException as e:
             print("Service call failed: %s" % e)
+
 
     def step(self, action):
         self._act(action)
@@ -95,7 +95,7 @@ class SawyerPushXYEnv(sawyer_pushing.SawyerPushXYEnv, MultitaskEnv):
             self._reset_robot()
         if self.pause_on_reset:
             if self.AUTO_MOVE_OBJ:
-                input("check")
+                #input("check")
                 print(bcolors.OKGREEN+'Auto move object to reset position'+bcolors.ENDC)
                 pos = list([self.pos_object_reset_position[0],self.pos_object_reset_position[1],self.pos_object_reset_position[2]])
                 self.set_obj_to_pos('cylinder',pos)
@@ -130,12 +130,12 @@ class SawyerPushXYEnv(sawyer_pushing.SawyerPushXYEnv, MultitaskEnv):
         goal = goal['state_desired_goal']
         obj_goal = np.concatenate((goal[:2], [self.z]))
         # avoid collision by move the ee epsilon higher
-        eps = 0.3
+        eps = 0.2
         ee_obj_goal = np.concatenate((goal[:2], [self.z+eps]))
         ee_goal = np.concatenate((goal[2:4], [self.z]))
-        self._position_act(ee_obj_goal - self._get_endeffector_pose()[:3])
+        self.position_no_contrains(ee_obj_goal - self._get_endeffector_pose()[:3])
         if self.AUTO_MOVE_OBJ:
-            input("check")
+            #input("check")
             print(bcolors.OKGREEN + 'Auto place object at end effector location' +
                   bcolors.ENDC)
             x=goal[0] 
@@ -146,10 +146,18 @@ class SawyerPushXYEnv(sawyer_pushing.SawyerPushXYEnv, MultitaskEnv):
         else:
             input(bcolors.OKBLUE + 'Place object at end effector location and press enter' +
                   bcolors.ENDC)
-
+        eps = 0.5
+        safePos = list([self.pos_control_reset_position[0]+ eps,self.pos_control_reset_position[1]+eps,self.pos_control_reset_position[2]+eps])
+        self._position_act(safePos - self._get_endeffector_pose()[:3])
         self._position_act(ee_goal - self._get_endeffector_pose()[:3])
         
-
+    def position_no_contrains(self, action):
+        ee_pos = self._get_endeffector_pose()
+        endeffector_pos = ee_pos[:3]
+        target_ee_pos = (endeffector_pos + action)
+        target_ee_pos = np.concatenate((target_ee_pos, [self.config.POSITION_CONTROL_EE_ORIENTATION.x, self.config.POSITION_CONTROL_EE_ORIENTATION.y, self.config.POSITION_CONTROL_EE_ORIENTATION.z, self.config.POSITION_CONTROL_EE_ORIENTATION.w]))
+        angles = self.request_ik_angles(target_ee_pos, self._get_joint_angles())
+        self.send_angle_action(angles, target_ee_pos)
 
 if __name__ == "__main__":
     env = SawyerPushXYEnv()
