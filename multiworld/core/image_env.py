@@ -162,6 +162,7 @@ class ImageEnv(ProxyEnv, MultitaskEnv):
             # TUNG: Reset object to reset position again (after moved to goal position)
             if self.pause_on_reset:
                 if self.wrapped_env.AUTO_MOVE_OBJ:
+                    input("check")
                     print(bcolors.OKGREEN + 'Auto move object to original reset position'
                           + bcolors.ENDC)
                     x=self.wrapped_env.pos_object_reset_position[0]

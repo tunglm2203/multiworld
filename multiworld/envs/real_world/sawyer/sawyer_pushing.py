@@ -45,6 +45,7 @@ class SawyerPushXYEnv(sawyer_pushing.SawyerPushXYEnv, MultitaskEnv):
 
     def set_obj_to_pos(self,name, pos):
         #rospy.init_node('set_pose')
+        time.sleep(5)
         state_msg = ModelState()
         state_msg.model_name = name
         state_msg.pose.position.x = float(pos[0])
@@ -94,6 +95,7 @@ class SawyerPushXYEnv(sawyer_pushing.SawyerPushXYEnv, MultitaskEnv):
             self._reset_robot()
         if self.pause_on_reset:
             if self.AUTO_MOVE_OBJ:
+                input("check")
                 print(bcolors.OKGREEN+'Auto move object to reset position'+bcolors.ENDC)
                 pos = list([self.pos_object_reset_position[0],self.pos_object_reset_position[1],self.pos_object_reset_position[2]])
                 self.set_obj_to_pos('cylinder',pos)
@@ -127,20 +129,26 @@ class SawyerPushXYEnv(sawyer_pushing.SawyerPushXYEnv, MultitaskEnv):
     def set_to_goal(self, goal):
         goal = goal['state_desired_goal']
         obj_goal = np.concatenate((goal[:2], [self.z]))
+        # avoid collision by move the ee epsilon higher
+        eps = 0.3
+        ee_obj_goal = np.concatenate((goal[:2], [self.z+eps]))
         ee_goal = np.concatenate((goal[2:4], [self.z]))
+        self._position_act(ee_obj_goal - self._get_endeffector_pose()[:3])
         if self.AUTO_MOVE_OBJ:
+            input("check")
             print(bcolors.OKGREEN + 'Auto place object at end effector location' +
                   bcolors.ENDC)
-            # TUNG: +- 0.05 to avoid collision since object right below gripper
-            x=goal[0] + 0.05
-            y=goal[1] - 0.05
+            x=goal[0] 
+            y=goal[1]
             z=self.pos_object_reset_position[2]
             self.set_obj_to_pos('cylinder',[x,y,z])
 
         else:
             input(bcolors.OKBLUE + 'Place object at end effector location and press enter' +
                   bcolors.ENDC)
+
         self._position_act(ee_goal - self._get_endeffector_pose()[:3])
+        
 
 
 if __name__ == "__main__":
