@@ -66,7 +66,7 @@ class SawyerPushXYEnv(sawyer_pushing.SawyerPushXYEnv, MultitaskEnv):
         else:
             self._reset_robot()
         if self.pause_on_reset:
-            if self.use_gazebo_auto:
+            if self.use_gazebo_auto and self.use_gazebo:
                 print(
                     bcolors.OKBLUE + 'move object to reset position and press enter' + bcolors.ENDC)
                 if self.random_init:
