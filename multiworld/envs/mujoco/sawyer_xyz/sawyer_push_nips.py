@@ -541,16 +541,10 @@ class SawyerPushAndReachXYEasyEnv(SawyerPushAndReachXYEnv):
             **kwargs
     ):
         self.quick_init(locals())
-        if swap_xy:
-            default_kwargs = dict(
-                puck_goal_low=(0.5, -0.2),
-                puck_goal_high=(0.7, 0.2),
-            )
-        else:
-            default_kwargs = dict(
-                puck_goal_low=(-0.2, 0.5),
-                puck_goal_high=(0.2, 0.7),
-            )
+        default_kwargs = dict(
+            puck_goal_low=(-0.2, 0.5),
+            puck_goal_high=(0.2, 0.7),
+        )
         actual_kwargs = {
             **default_kwargs,
             **kwargs
@@ -589,4 +583,7 @@ class SawyerPushAndReachXYHarderEnv(SawyerPushAndReachXYEnv):
         )
 
     def sample_puck_xy(self):
-        return np.array([0, 0.6])
+        if swap_xy:
+            return np.array([0.6, 0])
+        else:
+            return np.array([0, 0.6])
