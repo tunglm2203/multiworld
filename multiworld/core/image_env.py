@@ -156,6 +156,11 @@ class ImageEnv(ProxyEnv, MultitaskEnv):
             env_state = self.wrapped_env.get_env_state()
             self.wrapped_env.set_to_goal(self.wrapped_env.get_goal())
             self._img_goal = self._get_flat_img()
+
+            # TUNG: Hack to expose low-level function
+            ee_reset_high = np.concatenate((self.wrapped_env.pos_control_reset_position[:2],
+                                            [self.wrapped_env.config.POSITION_SAFETY_BOX_HIGHS[2]]))
+            self.wrapped_env._position_act(ee_reset_high - self.wrapped_env._get_endeffector_pose())
             self.wrapped_env.set_env_state(env_state)
 
         if self.wrapped_env.__class__.__name__ == 'SawyerPushXYEnv':
@@ -167,8 +172,8 @@ class ImageEnv(ProxyEnv, MultitaskEnv):
                     obj_pos = [self.wrapped_env.pos_object_reset_position[0],
                                self.wrapped_env.pos_object_reset_position[1],
                                self.wrapped_env.pos_object_reset_position[2]]
-                    obj_name = 'cylinder'
-                    self.wrapped_env.set_obj_to_pos_in_gazebo(obj_name, obj_pos)
+                    self.wrapped_env.set_obj_to_pos_in_gazebo(self.wrapped_env.config.OBJECT_NAME,
+                                                              obj_pos)
                 else:
                     input(bcolors.OKBLUE + 'move object to original reset position and press enter'
                           + bcolors.ENDC)
