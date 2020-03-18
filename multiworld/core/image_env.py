@@ -156,27 +156,34 @@ class ImageEnv(ProxyEnv, MultitaskEnv):
             env_state = self.wrapped_env.get_env_state()
             self.wrapped_env.set_to_goal(self.wrapped_env.get_goal())
             self._img_goal = self._get_flat_img()
-
-            # TUNG: Hack to expose low-level function
-            ee_reset_high = np.concatenate((self.wrapped_env.pos_control_reset_position[:2],
+            if self.wrapped_env.__class__.__name__ == 'SawyerPushXYEnv':
+                # TUNG: Hack to expose low-level function
+                goal = self.wrapped_env._state_goal
+                ee_goal_high = np.concatenate((goal[2:], [self.config.POSITION_SAFETY_BOX_HIGHS[2]]))
+                ee_reset_high = np.concatenate((self.wrapped_env.pos_control_reset_position[:2],
                                             [self.wrapped_env.config.POSITION_SAFETY_BOX_HIGHS[2]]))
-            self.wrapped_env._position_act(ee_reset_high - self.wrapped_env._get_endeffector_pose())
-            self.wrapped_env.set_env_state(env_state)
+                self.wrapped_env._position_act(ee_goal_high -
+                                               self.wrapped_env._get_endeffector_pose())
+                # TUNG: Reset object to reset position again (after moved to goal position)
+                if self.pause_on_reset:
+                    if self.wrapped_env.use_gazebo_auto and self.wrapped_env.use_gazebo:
+                        print(
+                            bcolors.OKBLUE + 'move object to original reset position and press enter'
+                            + bcolors.ENDC)
+                        obj_pos = [self.wrapped_env.pos_object_reset_position[0],
+                                   self.wrapped_env.pos_object_reset_position[1],
+                                   self.wrapped_env.pos_object_reset_position[2]]
+                        self.wrapped_env.set_obj_to_pos_in_gazebo(
+                            self.wrapped_env.config.OBJECT_NAME,
+                            obj_pos)
+                    else:
+                        input(
+                            bcolors.OKBLUE + 'move object to original reset position and press enter'
+                            + bcolors.ENDC)
+                self.wrapped_env._position_act(ee_reset_high -
+                                               self.wrapped_env._get_endeffector_pose())
 
-        if self.wrapped_env.__class__.__name__ == 'SawyerPushXYEnv':
-            # TUNG: Reset object to reset position again (after moved to goal position)
-            if self.pause_on_reset:
-                if self.wrapped_env.use_gazebo_auto and self.wrapped_env.use_gazebo:
-                    print(bcolors.OKBLUE + 'move object to original reset position and press enter'
-                          + bcolors.ENDC)
-                    obj_pos = [self.wrapped_env.pos_object_reset_position[0],
-                               self.wrapped_env.pos_object_reset_position[1],
-                               self.wrapped_env.pos_object_reset_position[2]]
-                    self.wrapped_env.set_obj_to_pos_in_gazebo(self.wrapped_env.config.OBJECT_NAME,
-                                                              obj_pos)
-                else:
-                    input(bcolors.OKBLUE + 'move object to original reset position and press enter'
-                          + bcolors.ENDC)
+            self.wrapped_env.set_env_state(env_state)
 
         return self._update_obs(obs)
 
