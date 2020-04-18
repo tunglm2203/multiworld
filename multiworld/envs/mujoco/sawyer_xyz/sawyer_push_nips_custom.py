@@ -66,12 +66,14 @@ class SawyerPushAndReachCustomXYEnv(MujocoEnv, Serializable, MultitaskEnv):
             mocap_low=(-0.1, 0.5, 0.0),
             mocap_high=(0.1, 0.7, 0.5),
             force_puck_in_goal_space=False,
+            random_init=False,
     ):
         self.quick_init(locals())
         self.reward_info = reward_info
         self.randomize_goals = randomize_goals
         self._pos_action_scale = pos_action_scale
         self.hide_goal = hide_goal
+        self.random_init = random_init
 
         # TUNG: Add for consistent with real env
         if swap_xy:
@@ -555,10 +557,13 @@ class SawyerPushAndReachCustomXYEasyEnv(SawyerPushAndReachCustomXYEnv):
         )
 
     def sample_puck_xy(self):
-        if swap_xy:
-            return np.array([0.6, 0])
+        if self.random_init:
+            return self.goal_box.sample()[2:]
         else:
-            return np.array([0, 0.6])
+            if swap_xy:
+                return np.array([0.6, 0])
+            else:
+                return np.array([0, 0.6])
 
 
 class SawyerPushAndReachCustomXYHarderEnv(SawyerPushAndReachCustomXYEnv):
@@ -583,7 +588,10 @@ class SawyerPushAndReachCustomXYHarderEnv(SawyerPushAndReachCustomXYEnv):
         )
 
     def sample_puck_xy(self):
-        if swap_xy:
-            return np.array([0.6, 0])
+        if self.random_init:
+            return self.goal_box.sample()[2:]
         else:
-            return np.array([0, 0.6])
+            if swap_xy:
+                return np.array([0.6, 0])
+            else:
+                return np.array([0, 0.6])
