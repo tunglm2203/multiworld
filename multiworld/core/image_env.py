@@ -213,10 +213,28 @@ class ImageEnv(ProxyEnv, MultitaskEnv):
         return obs
 
     def _get_flat_img(self):
+        """ TUNG: The func get_image() called 2 times to fix bug generating wrong image.
+        This problem happens when run two environments (env1, env2) wrapped by ImageEnv()
+        concurrently. This will make env1 generate image_observation of env2, and vice versa.
+        I don't understand why it happened.
+
+        The func get_image() using MjSim.render() to get image, this CAN be reason, but not sure.
+        Please check the piece of code bellow (in .multiworld/multiworld/envs/mujoco/mujoco_env.py):
+        `
+        def get_image(self, width=84, height=84, camera_name=None):
+            return self.sim.render(
+                width=width,
+                height=height,
+                camera_name=camera_name,
+            )`
+        Actually, I'm quite not understand why call 2 times will avoid it, just lucky :)
+        """
+        self._wrapped_env.get_image(width=self.imsize, height=self.imsize)
+
         image_obs = self._wrapped_env.get_image(
             width=self.imsize,
             height=self.imsize,
-        )   # image_obs in format HWC
+        )  # image_obs in format HWC
         image_obs = np.swapaxes(image_obs, 0, 2)    # Change to format CHW
         self._last_image = image_obs
         if self.grayscale:
