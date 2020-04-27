@@ -142,7 +142,7 @@ class SawyerPushAndReachCustomXYEnv(MujocoEnv, Serializable, MultitaskEnv):
         #     np.array([-0.2, 0.5, -0.2, 0.5, -0.2, 0.5]),
         #     np.array([0.2, 0.7, 0.2, 0.7, 0.2, 0.7]),
         # )
-
+        self.OBJECT_RADIUS = 0.04 + 0.04
         self.reset()
         self.reset_mocap_welds()
 
@@ -558,7 +558,13 @@ class SawyerPushAndReachCustomXYEasyEnv(SawyerPushAndReachCustomXYEnv):
 
     def sample_puck_xy(self):
         if self.random_init:
-            return self.goal_box.sample()[2:]
+            ee_pos = self.get_endeff_pos()
+            while True:
+                puck_pos = self.goal_box.sample()[2:]
+                dis_obj_vs_ee = np.linalg.norm(ee_pos[:2] - puck_pos)
+                if dis_obj_vs_ee > self.OBJECT_RADIUS:
+                    break
+            return puck_pos
         else:
             if swap_xy:
                 return np.array([0.6, 0])
@@ -589,7 +595,13 @@ class SawyerPushAndReachCustomXYHarderEnv(SawyerPushAndReachCustomXYEnv):
 
     def sample_puck_xy(self):
         if self.random_init:
-            return self.goal_box.sample()[2:]
+            ee_pos = self.get_endeff_pos()
+            while True:
+                puck_pos = self.goal_box.sample()[2:]
+                dis_obj_vs_ee = np.linalg.norm(ee_pos[:2] - puck_pos)
+                if dis_obj_vs_ee > self.OBJECT_RADIUS:
+                    break
+            return puck_pos
         else:
             if swap_xy:
                 return np.array([0.6, 0])
