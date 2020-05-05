@@ -143,6 +143,7 @@ class ImageEnv(ProxyEnv, MultitaskEnv):
 
     def reset(self):
         obs = self.wrapped_env.reset()
+        self.wrapped_env.in_reset = True
         if self.num_goals_presampled > 0:
             goal = self.sample_goal()
             self._img_goal = goal['image_desired_goal']
@@ -184,7 +185,7 @@ class ImageEnv(ProxyEnv, MultitaskEnv):
                                                self.wrapped_env._get_endeffector_pose())
 
             self.wrapped_env.set_env_state(env_state)
-
+        self.wrapped_env.in_reset = False
         return self._update_obs(obs)
 
     def _get_obs(self):
