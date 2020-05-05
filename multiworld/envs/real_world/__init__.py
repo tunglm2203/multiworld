@@ -20,7 +20,7 @@ def register_real_worl_envs():
     """
     Reaching tasks
     """
-    max_speed = 0.15
+    max_speed = 0.1
     register(
         id='SawyerReachXYZReal-v0',
         entry_point='multiworld.envs.real_world.sawyer.sawyer_reaching:SawyerReachXYZEnv',
